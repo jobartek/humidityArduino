@@ -3,6 +3,7 @@ const int LED_PIN = 2;
 const int LED_CONTROL_PIN = 4;
 const int SENSOR = 3;
 const int SENSOR_CONTROL = 4;
+const int WATERPUMP_HUMIDITY_TRESHOLD = 600;
 
 void setup(){
   Serial.begin(9600);
@@ -34,7 +35,7 @@ void setPin(int c){
     case 114:
       digitalWrite(SENSOR_CONTROL, HIGH);
       delay(2000);
-      val = getAveragehumidity();
+      val = getAverageHumidityAndEnablePump(false);
       delay(1000);
       digitalWrite(SENSOR_CONTROL, LOW);
       Serial.println(val);
@@ -50,7 +51,7 @@ void setPin(int c){
   }
 }
 
-int getAveragehumidity(){
+int getAverageHumidityAndEnablePump(boolean enablePump){
   int const NUMBER_OF_MEASUREMENTS=10;
   int data[NUMBER_OF_MEASUREMENTS];
   int sumOfMeasurements=0;
@@ -59,6 +60,16 @@ int getAveragehumidity(){
     sumOfMeasurements+=data[i];
     delay(2000);
   }
-  return sumOfMeasurements/NUMBER_OF_MEASUREMENTS;
+  int average = sumOfMeasurements/NUMBER_OF_MEASUREMENTS;
+  if(enablePump){
+    if(average>WATERPUMP_HUMIDITY_TRESHOLD) enableWaterPump();
+  }
+  return average;
+}
+
+void enableWaterPump(){
+  digitalWrite(LED_PIN, HIGH);
+  delay(7000);
+  digitalWrite(LED_PIN, LOW);
 }
 
